@@ -1,0 +1,97 @@
+
+resource "aws_vpc" "kayodevpc" {
+  cidr_block       = "10.0.0.0/16"
+  instance_tenancy = "default"
+
+  tags = {
+    Name = "kayode_vpc"
+  }
+}
+
+
+resource "aws_subnet" "public" {
+  vpc_id     = aws_vpc.kayodevpc.id
+  cidr_block = "10.0.0.0/24"
+
+  tags = {
+    Name = "kayode_public subnet"
+  }
+}
+
+
+resource "aws_subnet" "private" {
+  vpc_id     = aws_vpc.kayodevpc.id
+  cidr_block = "10.0.1.0/24"
+
+  tags = {
+    Name = "kayode_private subnet"
+  }
+}
+
+
+resource "aws_subnet" "class" {
+  vpc_id     = aws_vpc.kayodevpc.id
+  cidr_block = "10.0.2.0/24"
+
+  tags = {
+    Name = "kayode_class subnet"
+  }
+}
+
+
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.kayodevpc.id
+
+  tags = {
+    Name = "class Internet gw"
+  }
+}
+
+
+resource "aws_route_table" "kayoderoute" {
+  vpc_id = aws_vpc.kayodevpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.gw.id
+  }
+
+  tags = {
+    Name = "privateroute"
+  }
+}
+
+
+resource "aws_route_table" "kayoderoute" {
+  vpc_id = aws_vpc.kayodevpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.gw.id
+  }
+
+  tags = {
+    Name = "publiceroute"
+  }
+}
+
+
+resource "aws_route_table_association" "association1" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.kayoderoute.id
+}
+
+
+resource "aws_route_table_association" "associaton2" {
+  subnet_id      = aws_subnet.private.id
+  route_table_id = aws_route_table.kayoderoute.id
+}
+
+
+resource "aws_route_table_association" "association3" {
+  subnet_id      = aws_subnet.class.id
+  route_table_id = aws_route_table.kayoderoute.id
+}
+
+
+
